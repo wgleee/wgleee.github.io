@@ -9,8 +9,8 @@
 title: 浅行
 subtitle: 纸上得来终觉浅，绝知此事要躬行...
 description:
-keywords:
-author: Li Wanggui
+keywords: linux, python
+author: 李王贵
 language: zh-CN
 timezone: Asia/Shanghai
 
@@ -84,5 +84,3 @@ deploy:
   type: git
   repo: https://github.com/wgleee/wgleee.github.io.git
   branch: master
-  name: wgleee
-  email: liwanggui@hotmail.com

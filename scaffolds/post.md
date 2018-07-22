@@ -5,4 +5,7 @@ categories:
 tags:
 ---
 
-{% centerquote %} description {% endcenterquote %}
+{% centerquote %}
+引用
+{% endcenterquote %}
+<!-- more -->

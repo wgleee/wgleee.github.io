@@ -45,10 +45,10 @@ cache:
 # For example, you put your favicons into `hexo-site/source/images` directory.
 # Then need to rename & redefine they on any other names, otherwise icons from Next will rewrite your custom icons in Hexo.
 favicon:
-  small: /images/favicon-16x16-next.png
-  medium: /images/favicon-32x32-next.png
-  apple_touch_icon: /images/apple-touch-icon-next.png
-  safari_pinned_tab: /images/logo.svg
+  small: /images/favicon-16x16.png
+  medium: /images/favicon-32x32.png
+  # apple_touch_icon: /images/apple-touch-icon-next.png
+  # safari_pinned_tab: /images/logo.svg
   #android_manifest: /images/manifest.json
   #ms_browserconfig: /images/browserconfig.xml
 
@@ -73,7 +73,7 @@ footer:
     color: "#808080"
 
   # If not defined, will be used `author` from Hexo main config.
-  copyright: LiWanggui
+  copyright:
   # -------------------------------------------------------------
   powered:
     # Hexo link (Powered by Hexo).
@@ -124,7 +124,7 @@ menu:
   archives: /archives/ || archive
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
-  commonweal: /404/ || heartbeat
+  # commonweal: /404/ || heartbeat
 
 # Enable/Disable menu icons / item badges.
 menu_settings:
@@ -194,7 +194,7 @@ avatar:
   # in theme directory(source/images): /images/avatar.gif
   # in site  directory(source/uploads): /uploads/avatar.gif
   # You can also use other linking images.
-  url: #/images/avatar.gif
+  url: /images/avatar.jpg
   # If true, the avatar would be dispalyed in circle.
   rounded: false
   # The value of opacity should be choose from 0 to 1 to set the opacity of the avatar.
@@ -530,8 +530,8 @@ gitment:
   language: # Force language, or auto switch by theme
   github_user: wgleee # MUST HAVE, Your Github Username
   github_repo: wglee.org # MUST HAVE, The name of the repo you use to store Gitment comments
-  client_id: eb129946bad8766297fe  # MUST HAVE, Github client id for the Gitment
-  client_secret: fccf1d21bd24baa81e99b3c6b92a104f4cd9a8e1 # EITHER this or proxy_gateway, Github access secret token for the Gitment
+  client_id: 14e206ff788606cc4cd9  # MUST HAVE, Github client id for the Gitment
+  client_secret: cd5bd5969ed04a431b79e6e44da7b6ebc008f377 # EITHER this or proxy_gateway, Github access secret token for the Gitment
   proxy_gateway: # Address of api proxy, See: https://github.com/aimingoo/intersect
   redirect_protocol: # Protocol of redirect_uri with force_redirect_protocol when mint enabled
 
