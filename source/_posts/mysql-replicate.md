@@ -11,7 +11,7 @@ tags: mysql
 
 *环境说明*
 
-```
+```bash
 [root@master ~]# cat /etc/redhat-release
 CentOS release 6.8 (Final)
 [root@master ~]# uname -r
@@ -34,7 +34,7 @@ mysql  Ver 14.14 Distrib 5.6.39, for Linux (x86_64) using  EditLine wrapper
 
 **启用 binlog**
 
-```
+```bash
 [root@master ~]# cat /usr/local/mysql/etc/my.cnf
 [mysqld]
 
@@ -48,7 +48,7 @@ sync-binlog                    = 1
 
 **创建同步账号**
 
-```
+```bash
 mysql> grant replication slave on *.* to 'rsync'@'192.168.79.%' identified by '123456';
 mysql> flush privileges;
 ```
@@ -56,7 +56,7 @@ mysql> flush privileges;
 **导出数据**
 用于创建 *slave*
 
-```
+```bash
 mysqldump -uroot -p -A --events -B -x --master-data=1 | gzip > all.sql.gz
 ```
 
@@ -73,7 +73,7 @@ mysqldump -uroot -p -A --events -B -x --master-data=1 | gzip > all.sql.gz
 
 从库(slave1)用于备份可以启用 binlog, 如果用于读操作可以不启用,只配置 server-id 即可.
 
-```
+```bash
 [root@slave1 ~]# cat /usr/local/mysql/etc/my.cnf
 [mysqld]
 server-id                      = 13
@@ -86,14 +86,14 @@ log-slave-updates
 
 **从 master 恢复数据**
 
-```
+```bash
 [root@slave1 ~]# gzip -d all.sql.gz
 [root@slave1 ~]# mysql -uroot -p < all.sql
 ```
 
 **设置主从同步**
 
-```
+```bash
 # 从备份文件找到 CHANGE MASTER 命令
 [root@slave1 ~]# more all.sql
 -- CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000002', MASTER_LOG_POS=1307;

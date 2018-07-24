@@ -21,7 +21,7 @@ tags:
 
 *第一步：我们写一个简单的脚本 `ip.sh` (获取本机的公网的 IP)*
 
-```
+```bash
 #!/bin/bash
 
 curl ifconfig.me
@@ -29,7 +29,7 @@ curl ifconfig.me
 
 第二步：写一个对外的脚本 `test.sh`
 
-```
+```bash
 #!/bin/bash
 
 run="ip.sh"
@@ -52,7 +52,7 @@ _END_
 
 第三步： 使用 `tar` 工具将 `ip.sh` 压缩并追加到 `test.sh` 脚本文件中
 
-```
+```bash
 tar czm ip.sh >> test.sh
 ```
 
@@ -60,7 +60,7 @@ tar czm ip.sh >> test.sh
 
 最后我们就得到了一个简单并加密脚本文件了。正常执行下看看结果：
 
-```
+```bash
 # sh test.sh
 183.63.xxx.xxx
 ```

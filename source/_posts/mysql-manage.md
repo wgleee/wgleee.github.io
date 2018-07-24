@@ -16,7 +16,7 @@ tags:
 
 ### 创建用户
 
-```
+```bash
 # 创建用户（默认密码为空）
 mysql> create user 'username'@'host';
 
@@ -26,13 +26,13 @@ mysql> create user 'username'@'host' identified by 'password';
 
 ### 删除用户
 
-```
+```bash
 mysql> drop user 'username'@'host';
 ```
 
 ### 更改密码
 
-```
+```bash
 # 更改密码 （只对当前登录账号有效）
 mysql> set password=password('123456');
 
@@ -42,7 +42,7 @@ mysql> set password for 'username'@'host'=password('123456');
 
 ### 查询用户权限
 
-```
+```bash
 # 查询当前账号的权限
 mysql> show grants;
 
@@ -52,7 +52,7 @@ mysql> show grants for 'user'@'host';
 
 ### 用户授权
 
-```
+```bash
 # 对用户授权（如果用户存在就增加权限，不存在就创建用户不过密码为空）
 mysql> grant privileges on databasename.tablename to 'username'@'host';
 
@@ -64,7 +64,7 @@ mysql> grant privileges on databasename.tablename to 'username'@'host' identifie
 
 ### 用户权限回收
 
-```
+```bash
 mysql> revoke privilege on databasename.tablename from 'user'@'host';
 ```
 
@@ -75,7 +75,7 @@ mysql> revoke privilege on databasename.tablename from 'user'@'host';
 
 ### 数据库的基本操作
 
-```
+```bash
 # 显示数据库
 mysql> show databases;
 
@@ -91,7 +91,7 @@ mysql> drop database DATABASENAME;
 
 ### 备份数据库数据及表结构
 
-```
+```bash
 # 备份整个数据库
 [root@localhost ~]# mysqldump -uroot -p -A > all.sql
 
@@ -117,7 +117,7 @@ mysql> drop database DATABASENAME;
 ### 导出函数或者存储过程
 
 
-```
+```bash
 mysqldump -hHOSTNAME -uUSERNAME -pPASSWORD -ntd -R DATABASENAME > DATABASENAME.sql
 ```
 
@@ -126,7 +126,7 @@ mysqldump -hHOSTNAME -uUSERNAME -pPASSWORD -ntd -R DATABASENAME > DATABASENAME.s
 
 ### 恢复数据库数据
 
-```
+```bash
 # 使用系统命令
 [root@localhost ~]# mysql -uroot DATABASENAME < DATABASENAME.sql
 
@@ -143,7 +143,7 @@ mysql> source /root/lwg.sql;
 
 ### 表的基本操作
 
-```
+```bash
 # 查看数据库下所有的表
 mysql> show tables;
 
@@ -174,7 +174,7 @@ mysql> delete from TABLENAME;
 
 ### 表 `alter` 的相关操作
 
-```
+```bash
 # 增加一个字段(一列),并放到第一列的位置 (first)
 mysql> desc users;
 +------------+----------+------+-----+---------+-------+

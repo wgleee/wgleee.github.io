@@ -20,7 +20,7 @@ tags: mysql
 - [github 地址](https://github.com/mariadb-corporation/MaxScale)
 - [下载地址](https://downloads.mariadb.com/MaxScale)
 
-```
+```bash
 yum install https://downloads.mariadb.com/MaxScale/1.4.5/centos/6Server/x86_64/maxscale-1.4.5-1.centos.6.x86_64.rpm
 ```
 
@@ -28,7 +28,7 @@ yum install https://downloads.mariadb.com/MaxScale/1.4.5/centos/6Server/x86_64/m
 
 *在主库创建监控用户，路由用户*
 
-```
+```bash
 create user scalemon@'%' identified by "111111";
 grant replication slave, replication client on *.* to scalemon@'%';
 
@@ -50,7 +50,7 @@ grant select on mysql.* to maxscale@'%';
 
 由于我们使用了 [Read-Write Service]，需要删除或注释另一个服务 [Read-Only Service]，删除其整块儿内容即可。 [Read-Only Listener] 也需要同时删除或注释
 
-```
+```bash
 [root@MHA_Maxscale ~]# cat /etc/maxscale.cnf
 [maxscale]
 threads=1
@@ -113,7 +113,7 @@ port=6603
 
 *启动检查状态*
 
-```
+```bash
 [root@MHA_Maxscale ~]# /etc/init.d/maxscale
 [root@MHA_Maxscale ~]# netstat -anptl | grep maxscale
 tcp        0      0 0.0.0.0:4006                0.0.0.0:*                   LISTEN      1882/maxscale
@@ -125,7 +125,7 @@ tcp        0      0 0.0.0.0:6603                0.0.0.0:*                   LIST
 
 登录 MaxScale 管理器，查看一下数据库连接状态，默认的用户名和密码是 admin/mariadb
 
-```
+```bash
 [root@MHA_Maxscale ~]# maxadmin --user=admin --password=mariadb
 MaxScale> list servers
 Servers.

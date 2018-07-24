@@ -14,7 +14,7 @@ tags: rpm
 - [multipkg 源代码仓库](https://github.com/ytoolshed/multipkg.git)
 - [参考资料](https://yq.aliyun.com/articles/68346)
 
-```
+```bash
 git clone https://github.com/ytoolshed/multipkg.git
 
 cd multipkg
@@ -41,7 +41,7 @@ sudo yum upgrade ./multipkg*rpm
 
 **nginx 工程目录结构**
 
-```
+```bash
 nginx/
 ├── index.yaml
 ├── nginx-1.3.10.tar.gz
@@ -78,7 +78,7 @@ nginx/
 
 在工程目录执行以下命令生成 rpm 包
 
-```
+```bash
 [root@localhost nginx]# multipkg .
 nginx-1.3.10-0.1521267394.x86_64.rpm
 ```

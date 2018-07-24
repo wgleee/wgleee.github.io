@@ -13,7 +13,7 @@ tags: mysql
 
 通过以下命令全备主库
 
-```
+```bash
 mysqldump -uroot -p'wglee.org' -A --events -B -x --master-data=1 | gzip > $(date +%F).sql.gz
 ```
 
@@ -38,7 +38,7 @@ grep '^CHANGE MASTER' 2018-03-14.sql
 ### 将备份文件导入至从库
 ### 在从库上执行 `CHANGE MASTER` 语句, 启用主从同步功能
 
-```
+```bash
 CHANGE MASTER TO
 MASTER_USER='sync',
 MASTER_PORT=3306,
@@ -50,7 +50,7 @@ MASTER_LOG_POS=120;
 
 ### 检查从库状态
 
-```
+```bash
 show slave status\G
 ```
 

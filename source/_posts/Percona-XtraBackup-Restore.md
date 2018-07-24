@@ -16,7 +16,7 @@ tags: mysql
 
 [下载地址](https://www.percona.com/downloads/XtraBackup/LATEST/)
 
-```
+```bash
 yum install http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
 yum install percona-xtrabackup
 ```
@@ -26,7 +26,7 @@ yum install percona-xtrabackup
 
 ## 备份主库(全备)
 
-```
+```bash
 innobackupex --defaults-file=/usr/local/mysql/my.cnf -S /usr/local/mysql/data/mysql.sock --user=root --password=wglee  /data/backup/
 ```
 
@@ -49,13 +49,13 @@ server-id=133
 
 *拷贝主库备份文件至从库*
 
-```
+```bash
 scp -r /data/backup/2018-03-14_15-10-57 slave:/data/backup/
 ```
 
 *备份还原前期准备*
 
-```
+```bash
 # 停止数据库服务
 /etc/init.d/mysqld stop
 cd /usr/local/mysql
@@ -67,7 +67,7 @@ mv data data_ori
 
 一般情况下，在备份完成后，数据尚且不能用于恢复操作，因为备份的数据中可能会包含尚未提交的事务或已经提交但尚未同步至数据文件中的事务。因此，此时数据文件仍处理不一致状态。“准备” 的主要作用正是通过回滚未提交的事务及同步已经提交的事务至数据文件也使得数据文件处于一致性状态
 
-```
+```bash
 innobackupex --apply-log /data/backup/2018-03-14_15-10-57
 ```
 
@@ -75,7 +75,7 @@ innobackupex --apply-log /data/backup/2018-03-14_15-10-57
 
 *从备份恢复数据至从库*
 
-```
+```bash
 innobackupex --defaults-file=/usr/local/mysql/my.cnf --copy-back /data/backup/2018-03-14_15-10-57
 ```
 
@@ -83,7 +83,7 @@ innobackupex --defaults-file=/usr/local/mysql/my.cnf --copy-back /data/backup/20
 
 *修改相应权限*
 
-```
+```bash
 chown -R mysql.mysql /usr/local/mysql/data
 ```
 
@@ -91,7 +91,7 @@ chown -R mysql.mysql /usr/local/mysql/data
 
 查看备份文件 xtrabackup_binlog_info 获取 MASTER_LOG_FILE, MASTER_LOG_POS。
 
-```
+```bash
 CHANGE MASTER TO
 MASTER_HOST='<master_host>',
 MASTER_USER='<slave_username>',
@@ -102,13 +102,13 @@ MASTER_LOG_POS=<see xtrabackup_binlog_info>;
 
 *启动 slave*
 
-```
+```bash
 start slave;
 ```
 
 *查看从库状态*
 
-```
+```bash
 show slave status\G;
 ```
 
