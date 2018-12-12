@@ -2,7 +2,8 @@
 title: Percona-XtraBackup 快速重建 MySQL 从库
 date: 2018-03-14 15:56:14
 categories: mysql
-tags: mysql
+tags: 
+  - mysql
 ---
 
 > 本文将介绍如何使用 xtrabackup 快速重建 mysql 从库

@@ -2,7 +2,8 @@
 title: MySQL 传统主从同步配置
 date: 2018-04-03 15:59:14
 categories: mysql
-tags: mysql
+tags: 
+  - mysql
 ---
 
 > 生产环境中为扩展提高 mysql 的性能，往往需要配置主从同步，mysql 主从同步方式有基于传统和新的 GTID 模式两种，本文将介绍传统的主从同步方式.

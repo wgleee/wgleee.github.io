@@ -3,7 +3,6 @@ title: SHELL 脚本加密
 date: 2017-12-08 16:04:57
 categories: bash
 tags:
-    - linux
     - bash
 ---
 

@@ -2,7 +2,8 @@
 title: MaxScale 实现 MySQL 读写分离，负载均衡
 date: 2018-04-05 21:43:14
 categories: mysql
-tags: mysql
+tags: 
+  - mysql
 ---
 
 > maxscale 是 mariadb 公司开发的一套数据库中间件，可以很方便的实现读写分离方案；并且提供了读写分离的负载均衡和高可用性保障。另外 maxscale 对于前端应用而言是透明的，我们可以很方便的将应用迁移到 maxscale 中实现读写分离方案，来分担主库的压力。 maxscale 也提供了sql语句的解析过滤功能。这里我们主要讲解 maxscale 的安装、配置。

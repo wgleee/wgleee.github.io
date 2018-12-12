@@ -2,7 +2,8 @@
 title: 快速重建 MySQL 从库 (mysqldump)
 date: 2018-03-14 10:28:14
 categories: mysql
-tags: mysql
+tags:
+  - mysql
 ---
 
 > 工作中使用 MySQL5.6 传统同步方式，从库难免会出现各种问题需要恢复或者重建，本文将介绍如何快速创建/重建从库
