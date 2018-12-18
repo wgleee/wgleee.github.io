@@ -111,6 +111,14 @@ for config in configs:
 print(json.dumps(logfiles))
 ```
 
+**上传监控脚本至: /usr/local/zabbix/scripts**
+
+```bash
+local> mkdir /usr/local/zabbix/scripts
+local> cd /usr/local/zabbix/scripts
+# 上传监控脚本到此目录下并添加执行权限 `chmod +x`
+```
+
 ## 配置 zabbix-agent
 
 **修改 `zabbix_agentd.conf` 配置文件，添加以下配置**
@@ -121,20 +129,13 @@ Include=/usr/local/zabbix/etc/zabbix_agentd.conf.d/*.conf
 
 **添加自定义监控项**
 
-```
+```bash
+local> cd /usr/local/zabbix/etc/zabbix_agentd.conf.d
+local> cat nginx_userparameter.conf
 UserParameter=nginx.status[*],/usr/local/zabbix/scripts/nginx_status.sh $1
 UserParameter=nginx.discovery,/usr/bin/python /usr/local/zabbix/scripts/discovery_logfiles.py
 UserParameter=nginx.status_code[*],/bin/grep "$(date +'\[%d/%b/%Y:%H:%M:')" "$1" | /bin/grep -o "HTTP/[1-2].[0-1]\" $2" | wc -l
 ```
-
-**上传监控脚本至: /usr/local/zabbix/scripts**
-
-```
-mkdir /usr/local/zabbix/scripts
-cd /usr/local/zabbix/scripts
-# 上传监控脚本到此目录下并添加执行权限 `chmod +x`
-```
-
 
 **重启 zabbix-agten**
 
