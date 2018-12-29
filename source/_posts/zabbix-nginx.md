@@ -6,9 +6,8 @@ tags:
   - zabbix
 ---
 
-{% centerquote %}
-本文介绍如何利用 zabbix 监控 nginx 状态(网上有很文档)及监控 nginx 不同域名 http 状态码
-{% endcenterquote %}
+> 本文将介绍如何利用 Zabbix 监控 nginx 各项性能指标及实时监控各站点的 HTTP 状态码
+
 <!-- more -->
 
 ## 配置 nginx 
