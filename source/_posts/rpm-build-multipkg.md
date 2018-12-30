@@ -1,5 +1,5 @@
 ---
-title: RPM 包制作神器 multipkg
+title: RPM 包制作神器(multipkg)
 date: 2018-03-14 15:56:14
 categories: linux
 tags:

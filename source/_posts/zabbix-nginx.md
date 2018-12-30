@@ -6,7 +6,8 @@ tags:
   - zabbix
 ---
 
-本文将介绍如何利用 Zabbix 监控 NGINX 各项性能指标及实时监控各站点的 HTTP 状态码
+
+在实际工作生产环境中使用了 {% exturl Zabbix https://www.zabbix.com/ %} 监控平台监控所有服务器的性能及资源使用情况，但官方自带的监控项并不能满足我们工作中的要求，不过幸好 {% exturl Zabbix https://www.zabbix.com/ %} 能够灵活的支持各种脚本程序进行扩展监控，本文就将介绍如何利用 {% exturl Zabbix https://www.zabbix.com/ %} 监控 NGINX 各项性能指标及实时监控各站点的 HTTP 状态码
 
 <!-- more -->
 

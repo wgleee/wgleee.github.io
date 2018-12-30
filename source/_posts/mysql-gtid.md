@@ -1,17 +1,19 @@
 ---
-title: MySQL GTID 主从同步出错解决方法
+title: MYSQL GTID 主从同步出错解决方法
 date: 2018-12-12 11:06:38
 categories: mysql
 tags:
   - mysql
 ---
 
+GTID是MYSQL 5.6的新特性，其全称是Global Transaction Identifier，可简化MYSQL的主从切换以及Failover。GTID用于在binlog中唯一标识一个事务。当事务提交时，MYSQL Server在写binlog的时候，会先写一个特殊的Binlog Event，类型为GTID_Event，指定下一个事务的GTID，然后再写事务的Binlog。主从同步时GTID_Event和事务的Binlog都会传递到从库，从库在执行的时候也是用同样的GTID写binlog，这样主从同步以后，就可通过GTID确定从库同步到的位置了。也就是说，无论是级联情况，还是一主多从情况，都可以通过GTID自动找点儿，而无需像之前那样通过 File_name 和File_position 找点儿了
+
+<!-- more -->
+
 {% note info no-icon %}
 环境: 两台 MYSQL 5.6.27 数据库使用 gtid 做了主从同步
 原因: 由于从库没有限制好权限开发人员在从库插入数据从而导致主从同步失效
 {% endnote %}
-
-<!-- more -->
 
 ## 查看主从同步状态
 
