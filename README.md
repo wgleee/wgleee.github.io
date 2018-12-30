@@ -55,26 +55,4 @@ hexo server
 ## 在右上角或者左上角实现 `fork me on github`
 
 1. 在 [GitHub Ribbons](https://blog.github.com/2008-12-19-github-ribbons/) 或 [GitHub Corners](http://tholman.com/github-corners/) 选择一款你喜欢的挂饰，拷贝方框内的代码
-2. 将刚刚复制的挂饰代码，添加到 `wgleee.github.io/themes/next/layout/_layout.swig` 文件中，添加位置 (放在<div class="headband"></div>下方)
-
-
-## 头像圆角
-
-在 `wgleee.github.io/themes/next/source/css/_common/components/sidebar/sidebar-author.styl` 文件添加以下代码
-
-```
-.site-author-image {
-  display: block;
-  margin: 0 auto;
-  padding: $site-author-image-padding;
-  max-width: $site-author-image-width;
-  height: $site-author-image-height;
-  border: $site-author-image-border-width solid $site-author-image-border-color;
-  opacity: hexo-config('avatar.opacity') is a 'unit' ? hexo-config('avatar.opacity') : 1;
-  /* 头像圆形 */
-  border-radius: 80px;
-  -webkit-border-radius: 80px;
-  -moz-border-radius: 80px;
-  box-shadow: inset 0 -1px 0 #333sf;
-}
-```
+2. 将刚刚复制的挂饰代码，添加到 `wgleee.github.io/themes/next/layout/_layout.swig` 文件中，添加位置 (放在`<div class="headband"></div>`下方)
