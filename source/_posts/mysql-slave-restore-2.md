@@ -1,13 +1,14 @@
 ---
-title: Percona-XtraBackup 快速重建 MySQL 从库
+title: Percona-XtraBackup 快速重建 MYSQL 从库
 date: 2018-03-14 15:56:14
 categories: mysql
-tags: 
+tags:
   - mysql
 ---
 
-> 本文将介绍如何使用 xtrabackup 快速重建 mysql 从库
+The Percona XtraBackup tools provide a method of performing a hot backup of your MySQL data while the system is running. Percona XtraBackup is a free, online, open source, complete database backups solution for all versions of Percona Server for MySQL, MySQL® and MariaDB®. Percona XtraBackup performs online non-blocking, tightly compressed, highly secure full backups on transactional systems so that applications remain fully available during planned maintenance windows.
 
+本文将介绍如何使用 xtrabackup 快速重建 MYSQL 从库
 <!-- more -->
 
 ## 安装 Percona-XtraBackup
@@ -31,12 +32,11 @@ yum install percona-xtrabackup
 innobackupex --defaults-file=/usr/local/mysql/my.cnf -S /usr/local/mysql/data/mysql.sock --user=root --password=wglee  /data/backup/
 ```
 
-
-- --defaults-file: 指定 my.cnf 配置文件
-- -S: 指定 mysql.sock 文件路径
-- --user: 连接备份数据库使用的用户名
-- --password: 密码
-- /data/backup/: 备份文件存放的路径
+    - --defaults-file: 指定 my.cnf 配置文件
+    - -S: 指定 mysql.sock 文件路径
+    - --user: 连接备份数据库使用的用户名
+    - --password: 密码
+    - /data/backup/: 备份文件存放的路径
 
 
 ## 创建主库
@@ -72,7 +72,9 @@ mv data data_ori
 innobackupex --apply-log /data/backup/2018-03-14_15-10-57
 ```
 
-> 在实现“准备”的过程中，innobackupex 通常还可以使用 --use-memory 选项来指定其可以使用的内存的大小，默认通常为 100M。如果有足够的内存可用，可以多划分一些内存给 prepare 的过程，以提高其完成速度。
+{% note info %}
+在实现“准备”的过程中，innobackupex 通常还可以使用 --use-memory 选项来指定其可以使用的内存的大小，默认通常为 100M。如果有足够的内存可用，可以多划分一些内存给 prepare 的过程，以提高其完成速度。
+{% endnote %}
 
 *从备份恢复数据至从库*
 
@@ -113,10 +115,12 @@ start slave;
 show slave status\G;
 ```
 
-> 用 innobackupex 备份数据时，–apply-log 处理过的备份数据里有两个文件说明该备份数据对应的 binlog 的文件名和位置。但有时这俩文件说明的位置可能会不同。
+{% note info %}
+用 `innobackupex` 备份数据时，`–apply-log` 处理过的备份数据里有两个文件说明该备份数据对应的 binlog 的文件名和位置。但有时这俩文件说明的位置可能会不同。
 
-> 1. 对于纯 InnoDB 操作，备份出来的数据中上述两个文件的内容是一致的
-> 2. 对于 InnoDB 和非事务存储引擎混合操作，xtrabackup_binlog_info 中所示的 position 应该会比 xtrabackup_pos_innodb 所示的数值大。此时应以 xtrabackup_binlog_info 为准；而后者和 apply-log 时 InnoDB recovery log 中显示的内容是一致的，只针对 InnoDB 这部分数据。
+1) 对于纯 `InnoDB` 操作，备份出来的数据中上述两个文件的内容是一致的
+2) 对于 `InnoDB` 和非事务存储引擎混合操作，`xtrabackup_binlog_info` 中所示的 `position` 应该会比 `xtrabackup_pos_innodb` 所示的数值大。此时应以 `xtrabackup_binlog_info` 为准；而后者和 `apply-log` 时 `InnoDB` recovery log 中显示的内容是一致的，只针对 `InnoDB` 这部分数据。
 
+[参考地址](https://segmentfault.com/a/1190000002575399)
+{% endnote %}
 
-> [参考地址](https://segmentfault.com/a/1190000002575399)

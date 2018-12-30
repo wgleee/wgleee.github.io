@@ -1,16 +1,16 @@
 ---
-title: zabbix 监控 nginx
+title: ZABBIX 监控 NGINX
 date: 2018-12-18 11:40:31
 categories: zabbix
 tags:
   - zabbix
 ---
 
-> 本文将介绍如何利用 Zabbix 监控 nginx 各项性能指标及实时监控各站点的 HTTP 状态码
+本文将介绍如何利用 Zabbix 监控 NGINX 各项性能指标及实时监控各站点的 HTTP 状态码
 
 <!-- more -->
 
-## 配置 nginx 
+## 配置 nginx
 
 ```bash
 local> cd /usr/local/nginx/vhost
@@ -18,7 +18,7 @@ local> cat > nginx_status.conf
 server {
     listen 80 default;
     server_name localhost;
-    index index.html index.htm; 
+    index index.html index.htm;
     access_log off;
 
     location / {
@@ -30,11 +30,13 @@ server {
         auth_basic "nginx status";
         allow 127.0.0.1;
         deny all;
-    }    
+    }
 }
 ```
 
-> nginx 编译时需要添加 `--with-http_stub_status_module` 模块
+{% note info %}
+nginx 编译时需要添加 `--with-http_stub_status_module` 模块
+{% endnote %}
 
 ## 编写 zabbix 监控脚本
 
@@ -146,36 +148,36 @@ UserParameter=nginx.status_code[*],/bin/grep "$(date +'\[%d/%b/%Y:%H:%M:')" "$1"
 
 **创建 nginx 监控模板**
 
-1. 创建监控模板名称为: `Template App NGINX` 群组为: `Templates/Applications`
-2. 创建应用集名称为: nginx
+    1. 创建监控模板名称为: `Template App NGINX` 群组为: `Templates/Applications`
+    2. 创建应用集名称为: nginx
 
 {% asset_img zabbix-1.jpg %}
 {% asset_img zabbix-1.1.jpg %}
 
 **创建自动发现规则**
 
-1. 点击自动发现规则
-2. 创建自动发现规则 
-3. 键值输入: `nginx.discovery`
-4. 间隔为1小时
-5. 配置过滤器 (如图所示)
+    1. 点击自动发现规则
+    2. 创建自动发现规则
+    3. 键值输入: `nginx.discovery`
+    4. 间隔为1小时
+    5. 配置过滤器 (如图所示)
 
 {% asset_img zabbix-2.jpg %}
 {% asset_img zabbix-3.jpg %}
 
 **创建 nginx http 状态码监控项：添加监控原型**
 
-1. 监控原型
-2. 创建监控项原型
-3. 例如: 创建监控 `503` 状态码监控项, 其他状态码监控配置只需将 `503` 改为相应的状态码即可
+    1. 监控原型
+    2. 创建监控项原型
+    3. 例如: 创建监控 `503` 状态码监控项, 其他状态码监控配置只需将 `503` 改为相应的状态码即可
 
 {% asset_img zabbix-4.jpg %}
 
 **创建 nginx 状态监控项**
 
-1. 打开 nginx 监控模板
-2. 点击监控项
-3. 创建监控项
+    1. 打开 nginx 监控模板
+    2. 点击监控项
+    3. 创建监控项
 
 {% asset_img zabbix-5.jpg %}
 {% asset_img zabbix-6.jpg %}

@@ -2,11 +2,12 @@
 title: RPM 包制作神器 multipkg
 date: 2018-03-14 15:56:14
 categories: linux
-tags: 
+tags:
   - rpm
 ---
 
-> 在生产环境中大多数软件包都会采用编译的方式进行安装，编译安装软件，优点是可以定制化安装目录、按需开启功能等，缺点是需要查找并实验出适合的编译参数，诸如MySQL之类的软件编译耗时过长。 如果做成 rpm 然后在搭建一套内部的使用的 yum 仓库就会方便很多。但传统制作 rpm 包的方式但过于复杂难用。本文将介绍一款简单易用 rpm 打包工具 `multipkg`
+在生产环境中大多数软件包都会采用编译的方式进行安装，编译安装软件，优点是可以定制化安装目录、按需开启功能等，缺点是需要查找并实验出适合的编译参数，诸如MySQL之类的软件编译耗时过长。
+如果做成 rpm 然后在搭建一套内部的使用的 yum 仓库就会方便很多。但传统制作 rpm 包的方式但过于复杂难用。本文将介绍一款简单易用 rpm 打包工具 `multipkg`
 
 <!-- more -->
 
@@ -36,9 +37,7 @@ sudo yum upgrade ./multipkg*rpm
 
 ## 示例
 
-> [示例代码](https://github.com/liwanggui/multipkg-examples.git)
-
-以 nginx 为例
+[示例代码](https://github.com/liwanggui/multipkg-examples.git) 以 nginx 为例
 
 **nginx 工程目录结构**
 

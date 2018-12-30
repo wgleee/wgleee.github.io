@@ -1,12 +1,13 @@
 ---
-title: MaxScale 实现 MySQL 读写分离，负载均衡
+title: MaxScale 实现 MYSQL 读写分离，负载均衡
 date: 2018-04-05 21:43:14
 categories: mysql
-tags: 
+tags:
   - mysql
 ---
 
-> maxscale 是 mariadb 公司开发的一套数据库中间件，可以很方便的实现读写分离方案；并且提供了读写分离的负载均衡和高可用性保障。另外 maxscale 对于前端应用而言是透明的，我们可以很方便的将应用迁移到 maxscale 中实现读写分离方案，来分担主库的压力。 maxscale 也提供了sql语句的解析过滤功能。这里我们主要讲解 maxscale 的安装、配置。
+`maxscale` 是 mariadb 公司开发的一套数据库中间件，可以很方便的实现读写分离方案；并且提供了读写分离的负载均衡和高可用性保障。另外 `maxscale` 对于前端应用而言是透明的，我们可以很方便的将应用迁移到 `maxscale` 中实现读写分离方案，来分担主库的压力。
+`maxscale` 也提供了sql语句的解析过滤功能。这里我们主要讲解 `maxscale` 的安装、配置。
 
 <!-- more -->
 
@@ -41,15 +42,11 @@ grant select on mysql.* to maxscale@'%';
 
 *开始配置*
 
-找到 [server1] 部分，修改其中的 address 和 port，指向 master 的 IP 和端口。
-
-复制2次 [server1] 的整块儿内容，改为 [server2] 与 [server3]，同样修改其中的 address 和 port，分别指向 slave1 和 slave2
-
-找到 [MySQL Monitor] 部分，修改 servers 为 server1,server2,server3，修改 user 和 passwd 为之前创建的监控用户的信息（scalemon,111111）
-
-找到 [Read-Write Service] 部分，修改 servers 为 server1,server2,server3，修改 user 和 passwd 为之前创建的路由用户的信息（maxscale,111111）
-
-由于我们使用了 [Read-Write Service]，需要删除或注释另一个服务 [Read-Only Service]，删除其整块儿内容即可。 [Read-Only Listener] 也需要同时删除或注释
+    1. 找到 [server1] 部分，修改其中的 address 和 port，指向 master 的 IP 和端口。
+    2. 复制2次 [server1] 的整块儿内容，改为 [server2] 与 [server3]，同样修改其中的 address 和 port，分别指向 slave1 和 slave2
+    3. 找到 [MySQL Monitor] 部分，修改 servers 为 server1,server2,server3，修改 user 和 passwd 为之前创建的监控用户的信息（scalemon,111111）
+    4. 找到 [Read-Write Service] 部分，修改 servers 为 server1,server2,server3，修改 user 和 passwd 为之前创建的路由用户的信息（maxscale,111111）
+    5. 由于我们使用了 [Read-Write Service]，需要删除或注释另一个服务 [Read-Only Service]，删除其整块儿内容即可。 [Read-Only Listener] 也需要同时删除或注释
 
 ```bash
 [root@MHA_Maxscale ~]# cat /etc/maxscale.cnf
@@ -121,10 +118,10 @@ tcp        0      0 0.0.0.0:4006                0.0.0.0:*                   LIST
 tcp        0      0 0.0.0.0:6603                0.0.0.0:*                   LISTEN      1882/maxscale
 ```
 
-- 4006: 是连接 MaxScale 时使用的端口
-- 6603: 是 MaxScale 管理器的端口
+    - 4006: 是连接 MaxScale 时使用的端口
+    - 6603: 是 MaxScale 管理器的端口
 
-登录 MaxScale 管理器，查看一下数据库连接状态，默认的用户名和密码是 admin/mariadb
+登录 `MaxScale` 管理器，查看一下数据库连接状态，默认的用户名和密码是 `admin/mariadb`
 
 ```bash
 [root@MHA_Maxscale ~]# maxadmin --user=admin --password=mariadb

@@ -1,12 +1,12 @@
 ---
-title: MySQL 管理
+title: MYSQL 管理
 date: 2018-01-14 15:56:14
 categories: mysql
 tags:
     - mysql
 ---
 
-> MySQL 数据库基本管理命令，创建用户，授权，设置密码，备份，恢复，表结构更改等...
+MYSQL 数据库基本管理命令，创建用户，授权，设置密码，备份，恢复，表结构更改等...
 
 <!-- more -->
 

@@ -1,12 +1,12 @@
 ---
-title: 快速重建 MySQL 从库 (mysqldump)
+title: 快速重建 MYSQL 从库 (mysqldump)
 date: 2018-03-14 10:28:14
 categories: mysql
 tags:
   - mysql
 ---
 
-> 工作中使用 MySQL5.6 传统同步方式，从库难免会出现各种问题需要恢复或者重建，本文将介绍如何快速创建/重建从库
+工作中使用 MYSQL 5.6 传统同步方式，从库难免会出现各种问题需要恢复或者重建，本文将介绍如何快速创建/重建从库
 
 <!-- more -->
 
@@ -24,8 +24,9 @@ mysqldump -uroot -p'wglee.org' -A --events -B -x --master-data=1 | gzip > $(date
 - -x, --lock-all-tables：锁定所有数据库的所有表
 - --master-data=1: 等于1时会将 CHANGE MASTER 命令加入备份文件中
 
-> 注意，备份过程中会锁表，请不要在业务运行过程中执行，切记...
-> 将备份文件复制至从库
+{% note info %}
+注意，备份过程中会锁表，请不要在业务运行过程中执行，切记... 将备份文件复制至从库
+{% endnote %}
 
 ## 创建从库
 
@@ -55,8 +56,9 @@ MASTER_LOG_POS=120;
 show slave status\G
 ```
 
-> 最后测试主从同步
-
+{% note info %}
+最后测试主从同步
+{% endnote %}
 
 
 

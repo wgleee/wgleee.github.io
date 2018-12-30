@@ -6,11 +6,6 @@
   height: $site-author-image-height;
   border: $site-author-image-border-width solid $site-author-image-border-color;
   opacity: hexo-config('avatar.opacity') is a 'unit' ? hexo-config('avatar.opacity') : 1;
-  /* 头像圆形 */
-  border-radius: 80px;
-  -webkit-border-radius: 80px;
-  -moz-border-radius: 80px;
-  box-shadow: inset 0 -1px 0 #333sf;
 }
 
 if hexo-config('avatar.rounded') {
@@ -26,13 +21,13 @@ if hexo-config('avatar.rotated') {
   -ms-transition: -ms-transform 1.0s ease-out;
   transition: transform 1.0s ease-out;
 }
-}
 
-img:hover {
+.site-author-image:hover {
   -webkit-transform: rotateZ(360deg);
   -moz-transform: rotateZ(360deg);
   -ms-transform: rotate(360deg);
   transform: rotateZ(360deg);
+}
 }
 
 .site-author-name {
