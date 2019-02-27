@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.6.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="当使用 NGINX 作为反向代理时，为了支持长连接，需要做到两点： 1. 从 Client 到 NGINX 的连接是长连接 2. 从 NGINX 到 Server 的连接是长连接 从 HTTP 协议的角度看，NGINX 在这个过程中，对于客户端它扮演着HTTP服务器端的角色。而对于真正的服务器端（在 NGINX 的术语中称为 upstream）NGINX 又扮演着HTTP客户端的角色。">
+<meta name="keywords" content="linux, python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NGINX 支持 Keepalive 长连接">
+<meta property="og:url" content="https://wglee.org/2018/12/02/nginx-keepalive/index.html">
+<meta property="og:site_name" content="浅行">
+<meta property="og:description" content="当使用 NGINX 作为反向代理时，为了支持长连接，需要做到两点： 1. 从 Client 到 NGINX 的连接是长连接 2. 从 NGINX 到 Server 的连接是长连接 从 HTTP 协议的角度看，NGINX 在这个过程中，对于客户端它扮演着HTTP服务器端的角色。而对于真正的服务器端（在 NGINX 的术语中称为 upstream）NGINX 又扮演着HTTP客户端的角色。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-02-27T01:53:21.755Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NGINX 支持 Keepalive 长连接">
+<meta name="twitter:description" content="当使用 NGINX 作为反向代理时，为了支持长连接，需要做到两点： 1. 从 Client 到 NGINX 的连接是长连接 2. 从 NGINX 到 Server 的连接是长连接 从 HTTP 协议的角度看，NGINX 在这个过程中，对于客户端它扮演着HTTP服务器端的角色。而对于真正的服务器端（在 NGINX 的术语中称为 upstream）NGINX 又扮演着HTTP客户端的角色。">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="浅行" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://wglee.org/2018/12/02/nginx-keepalive/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>NGINX 支持 Keepalive 长连接 | 浅行</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?56ccab6b211cb3f234bded4695c44a01";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+    <a href="https://github.com/wgleee/wgleee.github.io" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">浅行</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">纸上得来终觉浅，绝知此事要躬行...</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://wglee.org/2018/12/02/nginx-keepalive/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="李王贵">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="浅行">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">NGINX 支持 Keepalive 长连接
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-02 17:14:55" itemprop="dateCreated datePublished" datetime="2018-12-02T17:14:55+08:00">2018-12-02</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-02-27 09:53:21" itemprop="dateModified" datetime="2019-02-27T09:53:21+08:00">2019-02-27</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/nginx/" itemprop="url" rel="index"><span itemprop="name">nginx</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>当使用 NGINX 作为反向代理时，为了支持长连接，需要做到两点：</p>
+<pre><code>1. 从 Client 到 NGINX 的连接是长连接
+2. 从 NGINX 到 Server 的连接是长连接
+</code></pre><p>从 HTTP 协议的角度看，NGINX 在这个过程中，对于客户端它扮演着HTTP服务器端的角色。而对于真正的服务器端（在 NGINX 的术语中称为 <code>upstream</code>）NGINX 又扮演着HTTP客户端的角色。</p>
+<a id="more"></a>
+<h1 id="保持和-Client-的长连接"><a href="#保持和-Client-的长连接" class="headerlink" title="保持和 Client 的长连接"></a>保持和 Client 的长连接</h1><p>为了在 Client 和 NGINX 之间保持上连接，有两个要求</p>
+<ol>
+<li>Client 发送的 HTTP 请求要求 <code>keepalive</code></li>
+<li>NGINX 设置上支持 <code>keepalive</code></li>
+</ol>
+<h2 id="HTTP-配置"><a href="#HTTP-配置" class="headerlink" title="HTTP 配置"></a>HTTP 配置</h2><p>默认情况下，NGINX 已经自动开启了对 Client 连接的 keepalive 支持。一般场景可以直接使用，但是对于一些比较特殊的场景，还是有必要调整个别参数。</p>
+<p>需要修改NGINX的配置文件(在NGINX安装目录下的<code>conf/nginx.conf</code>):</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    keepalive_timeout  <span class="number">120</span>s <span class="number">120</span>s;</span><br><span class="line">    keepalive_requests <span class="number">10000</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="keepalive-timeout-指令"><a href="#keepalive-timeout-指令" class="headerlink" title="keepalive_timeout 指令"></a>keepalive_timeout 指令</h3><p><em>keepalive_timeout指令的语法</em></p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">Syntax:</span> keepalive_timeout timeout [header_timeout]<span class="comment">;</span></span><br><span class="line"><span class="symbol">Default:</span>    keepalive_timeout <span class="number">75</span>s<span class="comment">;</span></span><br><span class="line"><span class="symbol">Context:</span>    http, server, location</span><br></pre></td></tr></table></figure>
+<p>第一个参数设置 <code>keepalive</code> 客户端连接在服务器端保持开启的超时值。值为 0 会禁用 <code>keepalive</code>客户端连接。可选的第二个参数在响应的 header 域中设置一个值 <code>&quot;Keep-Alive: timeout=time&quot;</code>。这两个参数可以不一样。</p>
+<div class="note info"><p>注：默认75s一般情况下也够用，对于一些请求比较大的内部服务器通讯的场景，适当加大为120s或者300s。第二个参数通常可以不用设置。</p></div>
+<h3 id="keepalive-requests-指令"><a href="#keepalive-requests-指令" class="headerlink" title="keepalive_requests 指令"></a>keepalive_requests 指令</h3><p><code>keepalive_requests</code> 指令用于设置一个<code>keepalive</code>连接上可以服务的请求的最大数量。当最大请求数量达到时，连接被关闭。默认是<code>100</code>。</p>
+<div class="note info"><p>这个参数的真实含义，是指一个<code>keepalive</code>建立之后，NGINX 就会为这个连接设置一个计数器，记录这个<code>keepalive</code>的长连接上已经接收并处理的客户端请求的数量。如果达到这个参数设置的最大值时，则nginx会强行关闭这个长连接，逼迫客户端不得不重新建立新的长连接。</p><p>这个参数往往被大多数人忽略，因为大多数情况下当QPS(每秒请求数)不是很高时，默认值100凑合够用。但是，对于一些QPS比较高（比如超过10000QPS，甚至达到30000,50000甚至更高) 的场景，默认的100就显得太低。</p><p>简单计算一下，QPS=10000时，客户端每秒发送10000个请求(通常建立有多个长连接)，每个连接只能最多跑100次请求，意味着平均每秒钟就会有100个长连接因此被nginx关闭。同样意味着为了保持QPS，客户端不得不每秒中重新新建100个连接。因此，如果用<code>netstat</code>命令看客户端机器，就会发现有大量的<code>TIME_WAIT</code>的<code>socket</code>连接(即使此时<code>keep alive</code>已经在Client和NGINX之间生效)。</p><p>因此对于QPS较高的场景，非常有必要加大这个参数，以避免出现大量连接被生成再抛弃的情况，减少<code>TIME_WAIT</code>。</p></div>
+<h1 id="保持和-Server-的长连接"><a href="#保持和-Server-的长连接" class="headerlink" title="保持和 Server 的长连接"></a>保持和 Server 的长连接</h1><p>为了让NGINX和Server（nginx称为upstream）之间保持长连接，典型设置如下：</p>
+<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    upstream backend &#123;</span><br><span class="line">        <span class="keyword">server</span>   <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span>：<span class="number">8080</span>  weight=<span class="number">1</span> max_fails=<span class="number">2</span> fail_timeout=<span class="number">30</span>s;</span><br><span class="line">        <span class="keyword">server</span>   <span class="number">192.168</span><span class="number">.0</span><span class="number">.2</span>：<span class="number">8080</span>  weight=<span class="number">1</span> max_fails=<span class="number">2</span> fail_timeout=<span class="number">30</span>s;</span><br><span class="line">        keepalive <span class="number">300</span>;      <span class="comment">// 这个很重要！</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">server</span> &#123;</span><br><span class="line">        listen <span class="number">8080</span> default_server;</span><br><span class="line">        server_name <span class="string">""</span>;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            proxy_pass http:<span class="comment">//backend;</span></span><br><span class="line">            proxy_http_version <span class="number">1.1</span>;       <span class="comment">// 这两个也要设置</span></span><br><span class="line">            proxy_set_header Connection <span class="string">""</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="upstream-设置"><a href="#upstream-设置" class="headerlink" title="upstream 设置"></a>upstream 设置</h2><p><code>upstream</code> 设置中，有个参数要特别的小心，就是这个 <code>keepalive</code>。</p>
+<p>大多数未仔细研读过 NGINX 的同学通常都会<strong>误解</strong>这个参数，有些人理解为这里的 <code>keepalive</code> 是设置是否打开长连接，以为应该设置为 <code>ON/OFF</code>。有些人会被前面的 <code>keepalive_timeout</code> 误导，以为这里也是设置 keepalive 的 timeout。</p>
+<p>但是实际上这个<code>keepalive</code>参数的含义非常的奇特，请小心看 <span class="exturl" data-url="aHR0cDovL25naW54Lm9yZy9lbi9kb2NzL2h0dHAvbmd4X2h0dHBfdXBzdHJlYW1fbW9kdWxlLmh0bWwja2VlcGFsaXZl" title="http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive">NGINX文档<i class="fa fa-external-link"></i></span> 中的说明:</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">Syntax:</span>    keepalive connections<span class="comment">;</span></span><br><span class="line"><span class="symbol">Default:</span>   —</span><br><span class="line"><span class="symbol">Context:</span>   upstream</span><br></pre></td></tr></table></figure>
+<div class="note info"><pre><code>Activates the cache for connections to upstream servers.</code></pre><blockquote><p>激活到upstream服务器的连接缓存。</p></blockquote><pre><code>The connections parameter sets the maximum number of idle keepalive connections to upstream servers that are preserved in the cache of each worker process. When this number is exceeded, the least recently used connections are closed.</code></pre><blockquote><p>connections参数设置每个worker进程在缓冲中保持的到upstream服务器的空闲keepalive连接的最大数量.当这个数量被突破时，最近使用最少的连接将被关闭。</p></blockquote><pre><code>It should be particularly noted that the keepalive directive does not limit the total number of connections to upstream servers that an nginx worker process can open. The connections parameter should be set to a number small enough to let upstream servers process new incoming connections as well.</code></pre><blockquote><p>keepalive指令不会限制一个nginx worker进程到upstream服务器连接的总数量。connections参数应该设置为一个足够小的数字来让upstream服务器来处理新进来的连接。</p></blockquote></div>
+<p><em>在这里可以看到，前面的几种猜测可以确认是错误的了</em></p>
+<pre><code>1. keepalive 不是 ON/OFF 之类的开关
+2. keepalive 不是 TIMEOUT，不是用来设置超时值
+</code></pre><p>很多人读到这里的文档之后，会产生另外一个误解：认为这个参数是设置到<code>upstream</code>服务器的长连接的数量，分歧在于是最大连接数还是最小连接数，不得不说这也是一个挺逗的分歧……</p>
+<p>回到<span class="exturl" data-url="aHR0cDovL25naW54Lm9yZy9lbi9kb2NzL2h0dHAvbmd4X2h0dHBfdXBzdHJlYW1fbW9kdWxlLmh0bWwja2VlcGFsaXZl" title="http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive">NGINX文档<i class="fa fa-external-link"></i></span>，请特别注意这句话，至关重要：</p>
+<div class="note info"><pre><code>The connections parameter sets the maximum number of idle keepalive connections to upstream servers</code></pre><blockquote><p>connections参数设置到upstream服务器的空闲keepalive连接的最大数量</p></blockquote></div>
+<p>请仔细体会这个 <code>idle</code> 的概念，何为<code>idle</code>。大多数人之所以误解为是到<code>upstream</code>服务器的最大长连接数，一般都是因为看到了文档中的这句话，而漏看了这个<code>idle</code>一词。</p>
+<p>然后继续看文档后面另外一句话：</p>
+<div class="note info"><pre><code>When this number is exceeded, the least recently used connections are closed.</code></pre><blockquote><p>当这个数量被突破时，最近使用最少的连接将被关闭。</p></blockquote></div>
+<p>这句话更是大大强化了前面关于<code>keepalive</code>设置的是最大长连接数的误解：如果连接数超过<code>keepalive</code>的限制，就关闭连接。这不是<strong>赤裸裸</strong>的最大连接数么？</p>
+<p>但是NGINX的文档立马给出了指示，否定了最大连接数的可能：</p>
+<div class="note info"><pre><code>It should be particularly noted that the keepalive directive does not limit the total number of connections to upstream servers that an nginx worker process can open.</code></pre><blockquote><p>特别提醒：keepalive 指令不会限制一个 nginx worker 进程到 upstream 服务器连接的总数量。</p></blockquote></div>
+<h3 id="keepalive-参数的理解"><a href="#keepalive-参数的理解" class="headerlink" title="keepalive 参数的理解"></a>keepalive 参数的理解</h3><p>要真正理解keepalive参数的含义，请回到文档中的这句：</p>
+<div class="note info"><pre><code>The connections parameter sets the maximum number of idle keepalive connections to upstream servers</code></pre><blockquote><p>connections 参数设置到 upstream 服务器的空闲 keepalive 连接的最大数量</p></blockquote></div>
+<p>请注意<strong>空闲</strong> keepalive 连接的最大数量中空闲这个关键字。</p>
+<p>为了能让大家理解这个概念，我们先假设一个场景： 有一个HTTP服务，作为<code>upstream</code>服务器接收请求，响应时间为100毫秒。如果要达到10000 QPS的性能，就需要在nginx和<code>upstream</code>服务器之间建立大约1000条HTTP连接。nginx为此建立连接池，然后请求过来时为每个请求分配一个连接，请求结束时回收连接放入连接池中，连接的状态也就更改为idle。</p>
+<p>我们再假设这个<code>upstream</code>服务器的<code>keepalive</code>参数设置比较小，比如常见的10.</p>
+<p>假设请求和响应是均匀而平稳的，那么这1000条连接应该都是一放回连接池就立即被后续请求申请使用，线程池中的idle线程会非常的少，趋进于零。我们以10毫秒为一个单位，来看连接的情况(注意场景是1000个线程+100毫秒响应时间，每秒有10000个请求完成)：</p>
+<ul>
+<li>每10毫秒有100个新请求，需要100个连接</li>
+<li>每10毫秒有100个请求结束，可以释放100个连接</li>
+<li>如果请求和应答都均匀，则10毫秒内释放的连接刚好够用，不需要新建连接，连接池空闲连接为零</li>
+</ul>
+<p>然后再回到现实世界，请求通常不是足够的均匀和平稳，为了简化问题，我们假设应答始终都是平稳的，只是请求不平稳，第一个10毫秒只有50,第二个10毫秒有150：</p>
+<ol>
+<li>下一个10毫秒，有100个连接结束请求回收连接到连接池，但是假设此时请求不均匀10毫秒内没有预计的100个请求进来，而是只有50个请求。注意此时连接池回收了100个连接又分配出去50个连接，因此连接池内有50个空闲连接。</li>
+<li>然后注意看<code>keepalive=10</code>的设置，这意味着连接池中最多容许保留有10个空闲连接。因此nginx不得不将这50个空闲连接中的40个关闭，只留下10个。</li>
+<li>再下一个10个毫秒，有150个请求进来，有100个请求结束任务释放连接。<code>150 - 100 = 50</code>,空缺了50个连接，减掉前面连接池保留的10个空闲连接，nginx不得不新建40个新连接来满足要求。</li>
+</ol>
+<p>我们可以看到，在短短的20毫秒内，仅仅因为请求不够均匀，就导致nginx在前10毫秒判断空闲连接过多关闭了40个连接，而后10毫秒又不得不新建40个连接来弥补连接的不足。</p>
+<p>再来一次类似的场景，假设请求是均匀的，而应答不再均匀，前10毫秒只有50个请求结束，后10毫秒有150个：</p>
+<ol>
+<li>前10毫秒，进来100个请求，结束50个请求，导致连接不够用，nginx为此新建50个连接</li>
+<li>后10毫秒，进来100个请求，结束150个请求，导致空闲连接过多，ngixn为此关闭了<code>150-100-10=40</code>个空闲连接</li>
+</ol>
+<div class="note info"><p>特别提醒的是：第二个应答不均匀的场景实际上是对应第一个请求不均匀的场景：正是因为请求不均匀，所以导致100毫秒之后这些请求的应答必然不均匀。</p></div>
+<p>现实世界中的请求往往和理想状态有巨大差异，请求不均匀，服务器处理请求的时间也不平稳，这理论上的大概1000个连接在反复的回收和再分配的过程中，必然出现两种非常矛盾场景在短时间内反复： 1. 连接不够用，造成新建连接 2. 连接空闲，造成关闭连接。从而使得总连接数出现反复震荡，不断的创建新连接和关闭连接，使得长连接的效果被大大削弱。</p>
+<p>造成连接数量反复震荡的一个推手，就是这个<code>keepalive</code> 这个最大空闲连接数。毕竟连接池中的1000个连接在频繁利用时，出现短时间内多余10个空闲连接的概率实在太高。因此为了避免出现上面的连接震荡，必须考虑加大这个参数，比如上面的场景如果将<code>keepalive</code>设置为<code>100</code>或者<code>200</code>,就可以非常有效的缓冲请求和应答不均匀。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>keepalive</code> 这个参数一定要小心设置，尤其对于QPS比较高的场景，推荐先做一下估算，根据QPS和平均响应时间大体能计算出需要的长连接的数量。比如前面10000 QPS和100毫秒响应时间就可以推算出需要的长连接数量大概是1000. 然后将<code>keepalive</code>设置为这个长连接数量的10%到30%。</p>
+<p>比较懒的同学，可以直接设置为 <code>keepalive=1000</code> 之类的，一般都OK的了。</p>
+<h2 id="location-设置"><a href="#location-设置" class="headerlink" title="location 设置"></a>location 设置</h2><p><code>location</code>中有两个参数需要设置：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    server &#123;</span><br><span class="line">        <span class="keyword">location</span> <span class="title">/  &#123;</span></span><br><span class="line"><span class="title">            proxy_http_version</span> <span class="number">1.1</span>;     // 这两个最好也设置</span><br><span class="line">            proxy_set_header Connection <span class="string">""</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>HTTP协议中对长连接的支持是从1.1版本之后才有的，因此最好通过 <code>proxy_http_version</code> 指令设置为 <code>1.1</code>，而 “Connection” header 应该被清理。清理的意思，我的理解，是清理从Client过来的http header，因为即使是Client和NGINX之间是短连接，NGINX 和 upstream 之间也是可以开启长连接的。这种情况下必须清理来自 Client 请求中的 “Connection” header。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/05/mysql-maxsacle/" rel="next" title="MaxScale 实现 MYSQL 读写分离，负载均衡">
+                <i class="fa fa-chevron-left"></i> MaxScale 实现 MYSQL 读写分离，负载均衡
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/12/mysql-gtid/" rel="prev" title="MYSQL GTID 主从同步出错解决方法">
+                MYSQL GTID 主从同步出错解决方法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8yODQ5OS81MDcw"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="李王贵">
+            
+              <p class="site-author-name" itemprop="name">李王贵</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                  
+                    
+                  
+                  <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2xpd2FuZ2d1aQ==" title="GitHub &rarr; https://github.com/liwanggui"><i class="fa fa-fw fa-github"></i></span>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                  
+                    
+                  
+                  <span class="exturl" data-url="bWFpbHRvOmxpd2cuanhAZ21haWwuY29t" title="E-Mail &rarr; mailto:liwg.jx@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                  
+                    
+                  
+                  <span class="exturl" data-url="aHR0cHM6Ly93ZWliby5jb20veW91cm5hbWU=" title="Weibo &rarr; https://weibo.com/yourname"><i class="fa fa-fw fa-weibo"></i></span>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                  
+                    
+                  
+                  <span class="exturl" data-url="aHR0cHM6Ly9wbHVzLmdvb2dsZS5jb20veW91cm5hbWU=" title="Google &rarr; https://plus.google.com/yourname"><i class="fa fa-fw fa-google"></i></span>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                  
+                    
+                  
+                  <span class="exturl" data-url="c2t5cGU6eW91cm5hbWU/Y2FsbHxjaGF0" title="Skype &rarr; skype:yourname?call|chat"><i class="fa fa-fw fa-skype"></i></span>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#保持和-Client-的长连接"><span class="nav-number">1.</span> <span class="nav-text">保持和 Client 的长连接</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-配置"><span class="nav-number">1.1.</span> <span class="nav-text">HTTP 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#keepalive-timeout-指令"><span class="nav-number">1.1.1.</span> <span class="nav-text">keepalive_timeout 指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#keepalive-requests-指令"><span class="nav-number">1.1.2.</span> <span class="nav-text">keepalive_requests 指令</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#保持和-Server-的长连接"><span class="nav-number">2.</span> <span class="nav-text">保持和 Server 的长连接</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#upstream-设置"><span class="nav-number">2.1.</span> <span class="nav-text">upstream 设置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#keepalive-参数的理解"><span class="nav-number">2.1.1.</span> <span class="nav-text">keepalive 参数的理解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">2.1.2.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#location-设置"><span class="nav-number">2.2.</span> <span class="nav-text">location 设置</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">李王贵</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <span class="exturl theme-link" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <span class="exturl theme-link" data-url="aHR0cHM6Ly90aGVtZS1uZXh0Lm9yZw==">NexT.Gemini</span></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.jsdelivr.net/velocity/1.2.3/velocity.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="//cdn.jsdelivr.net/velocity/1.2.3/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script type="text/javascript">
+      window.livereOptions = {
+        refer: '2018/12/02/nginx-keepalive/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/pangu/3.3.0/pangu.min.js"></script>
+  <script type="text/javascript">pangu.spacingPage();</script>
+
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/exturl.js?v=6.6.0"></script>
+
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+
+</body>
+</html>
